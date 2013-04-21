@@ -1,0 +1,32 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'thor'
+require_relative '../lib/hockeypuck'
+
+class Puck < Thor
+  map '-l' => :list
+
+  desc 'list', 'Shows all pucks to download'
+  method_option '-s', aliases: '--started', desc: 'started tasks'
+  method_option '-q', aliases: '--queued', desc: 'queued tasks'
+  method_option '-f', aliases: '--finished', desc: 'finished tasks'
+  method_option '-d', aliases: '--declined', desc: 'declined tasks'
+  def list
+    puts 'asdf'
+  end
+
+  desc 'get', 'Downloads a file'
+  def get
+    puck = Hockeypuck.new
+  end
+
+  desc 'sandbox', 'Run irb/pry to test methods'
+  def sandbox
+    require 'pry'
+    binding.pry
+  end
+
+end
+
+Puck.start
