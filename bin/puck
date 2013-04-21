@@ -7,7 +7,7 @@ require_relative '../lib/hockeypuck'
 class Puck < Thor
   map '-l' => :list
 
-  desc 'list', 'Shows all pucks to download'
+  desc 'list', 'Shows all pucks to get'
   method_option '-s', aliases: '--started', desc: 'started tasks'
   method_option '-q', aliases: '--queued', desc: 'queued tasks'
   method_option '-f', aliases: '--finished', desc: 'finished tasks'

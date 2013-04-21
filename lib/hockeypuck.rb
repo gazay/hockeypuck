@@ -8,19 +8,26 @@ require_relative 'hockeypuck/team'
 
 class Hockeypuck
 
-  attr_accessor :path, :file_type
+  attr_accessor :path, :file_type, :storage_path
 
   def initialize(opts = {}, *args)
     @path = opts[:path] || args[0]
     @file_type = opts[:file_type] || args[1]
-
-    Hockeypuck::Team.play self
   end
 
-  def fetch(file)
-    begin
-
+  def start!(without_team = false)
+    if without_team
+      Hockeypuck::Player.new.pass(self)
+    else
+      Hockeypuck::Team.play self
     end
+  end
+
+  def self.fetch(file, options = {})
+    options[:path] = file
+
+    puck = self.new options
+    puck.start!
   end
 
 end
