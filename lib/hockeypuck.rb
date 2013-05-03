@@ -1,45 +1,8 @@
 require 'net/http'
 require 'fileutils'
 require 'celluloid'
-
-class Player
-  include Celluloid
-
-  attr_reader :start, :finish, :downloaded, :path, :number, :finished
-
-  def initialize(range, number, path)
-    @start, @finish = range.split('-').map(&:to_i)
-    @number = number
-    @path = path
-    @downloaded = 0
-    @finished = false
-  end
-
-  def download(uri)
-    puts "Writing file #{download_path}"
-    Net::HTTP.start(uri.host, uri.port) do |http|
-      request = Net::HTTP::Get.new uri.request_uri
-      request['Range'] = "bytes=#{start + downloaded}-#{finish}"
-      http.request(request) do |resp|
-        File.open(download_path, 'a') do |file|
-          file.write resp.body
-          #resp.read_body do |chunk|
-            #file.write chunk
-            #@downloaded += chunk.length
-          #end
-        end
-      end
-    end
-
-    @finished = true
-    puts "Finished file #{download_path}"
-  end
-
-  def download_path
-    "#{path}_#{number}"
-  end
-
-end
+require_relative 'hockeypuck/player'
+require_relative 'hockeypuck/ball_hog'
 
 class Hockeypuck
 
@@ -108,8 +71,15 @@ class Hockeypuck
     if accepts_ranges? && !simple
       async_download
     else
-      simple_download
+      ball_hog
     end
+  end
+
+  def ball_hog
+    Hockeypuck::BallHog.
+      new(self).
+      async.
+      download
   end
 
   def async_download
@@ -144,13 +114,6 @@ class Hockeypuck
       end
     end
     "Downloading finished!!!"
-  end
-
-  def simple_download
-    File.open(download_path, 'w+') do |f|
-      puts "Writing file #{download_path}"
-      f.write http.get(uri.request_uri).body
-    end
   end
 
   def get_info
