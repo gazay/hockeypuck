@@ -2,6 +2,7 @@
 
 require 'rubygems'
 require 'thor'
+require 'benchmark'
 require_relative '../lib/hockeypuck'
 
 class Puck < Thor
@@ -21,10 +22,20 @@ class Puck < Thor
     puck = Hockeypuck.new
   end
 
-  desc 'sandbox', 'Run irb/pry to test methods'
-  def sandbox
-    require 'pry'
-    binding.pry
+  desc 'async downloading', 'Downloads file in 5 workers'
+  def async
+    puts Benchmark.measure {
+      puck = Hockeypuck.new 'http://www.nasa.gov/images/content/706436main_20121114-304-193Blend_M6-orig_full.jpg'
+      puck.start!
+    }
+  end
+
+  desc 'simple downloading', 'Downloads file in 1 thread'
+  def simple
+    puts Benchmark.measure {
+      puck = Hockeypuck.new 'http://www.nasa.gov/images/content/706436main_20121114-304-193Blend_M6-orig_full.jpg'
+      puck.start!(true)
+    }
   end
 
 end
