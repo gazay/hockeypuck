@@ -1,72 +1,34 @@
 require 'net/http'
 require 'fileutils'
 require 'celluloid'
+require_relative 'hockeypuck/rules'
 require_relative 'hockeypuck/player'
 require_relative 'hockeypuck/ball_hog'
 
 class Hockeypuck
 
-  attr_reader :uri, :http, :head, :size
-  attr_accessor :download_path
+  class << self
 
-  def initialize(path, file_path = nil)
-    Hockeypuck.download_path
-
-    @uri = URI path
-    @http = Net::HTTP.new(uri.host, uri.port)
-    @download_path = file_path || generate_path
-  end
-
-  def self.download_path
-    unless defined?(@@download_path)
-      download_path = '/tmp/downloads'
-    else
-      @@download_path
+    attr_reader :rules
+    def set_rules
+      @rules ||= Rules.new
+      yield(@rules) if block_given?
     end
+
   end
 
-  def self.download_path=(value)
-    puts "Download path now is #{value}"
-    @@download_path = value
+  def initialize(uri, with_info = true, file_path = nil)
+    clone_rules
+    rules.set uri, with_info, file_path
   end
 
-  def self.players
-    unless defined?(@@players)
-      download_path = 20
-    else
-      @@players
-    end
-  end
-
-  def self.players=(value)
-    puts "Players amount #{value}"
-    @@players = value
-  end
-
-  def self.create_directory
-    puts 'Checking existance of directory'
-
-    unless Dir.exists? download_path
-      dirs = download_path.split('/')
-      case dirs.first
-      when '.'
-        dirs[0] = Dir.pwd
-      when '~'
-        dirs[0] = `cd ~; pwd`.chop
-      end
-
-      dir_name = dirs.join('/')
-
-      unless Dir.exists? dir_name
-        puts "Creating directory with `mkdir -p #{dir_name}`"
-        FileUtils.mkdir_p dir_name
-      end
-    end
+  attr_reader :rules
+  def clone_rules
+    @rules = Hockeypuck.rules.clone
   end
 
   def start!(simple = false)
-    get_info
-    Hockeypuck.create_directory
+    Hockeypuck.create_gates
 
     if accepts_ranges? && !simple
       async_download
@@ -116,20 +78,10 @@ class Hockeypuck
     "Downloading finished!!!"
   end
 
-  def get_info
-    @head = http.request_head(uri.request_uri)
-    @size = @head['Content-Length'].to_i
-
-    @head
-  end
-
   def accepts_ranges?
     head['Accept-Ranges'] == 'bytes'
   end
 
-  def generate_path
-    file_name = File.basename(uri.path)
-    File.expand_path(file_name, Hockeypuck.download_path)
-  end
-
 end
+
+Hockeypuck.set_rules
