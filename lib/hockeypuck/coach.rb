@@ -1,21 +1,18 @@
 class Hockeypuck
   class Coach
 
-    attr_reader :current_puck
+    attr_reader :puck, :team, :rules
 
-    def initialize
+    def initialize(puck)
       @name = 'Don Johnson'
+      @puck = puck
     end
 
     def make_strategy_for(puck)
-      @current_puck = puck
-    end
-
-    def between(players)
-      part_size = players.count / @puck_size
-
-      players.each_with_index do |player, part|
-        player.pass @current_puck, part_offset(part_size, part)
+      if accepts_ranges? && !simple
+        async_download
+      else
+        ball_hog.score!
       end
     end
 

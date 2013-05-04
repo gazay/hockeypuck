@@ -19,23 +19,21 @@ class Hockeypuck
 
   end
 
+  attr_reader :rules, :head, :size
+
   def initialize(uri, with_info = true, file_path = nil)
     clone_rules
-    rules.set uri, with_info, file_path
-  end
-
-  attr_reader :rules
-  def clone_rules
-    @rules = Hockeypuck.rules.clone
+    rules.set uri, file_path
+    request_info! if with_info
   end
 
   def start!(simple = false)
-    Hockeypuck.create_gates
+    rules.set_gates
 
     if accepts_ranges? && !simple
       async_download
     else
-      ball_hog
+      ball_hog.score!
     end
   end
 
@@ -82,6 +80,17 @@ class Hockeypuck
 
   def accepts_ranges?
     head['Accept-Ranges'] == 'bytes'
+  end
+
+  private
+
+  def clone_rules
+    @rules = Hockeypuck.rules.clone
+  end
+
+  def request_info!
+    @head = rules.http.request_head(uri.request_uri)
+    @size = @head['Content-Length'].to_i
   end
 
 end
