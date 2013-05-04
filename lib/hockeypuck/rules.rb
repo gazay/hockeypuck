@@ -23,6 +23,27 @@ class Hockeypuck
       @size = @head['Content-Length'].to_i
     end
 
+    def create_gates
+      puts 'Checking existance of directory'
+
+      unless Dir.exists? download_path
+        dirs = download_path.split('/')
+        case dirs.first
+        when '.'
+          dirs[0] = Dir.pwd
+        when '~'
+          dirs[0] = `cd ~; pwd`.chop
+        end
+
+        dir_name = dirs.join('/')
+
+        unless Dir.exists? dir_name
+          puts "Creating directory with `mkdir -p #{dir_name}`"
+          FileUtils.mkdir_p dir_name
+        end
+      end
+    end
+
     private
 
     def generate_path

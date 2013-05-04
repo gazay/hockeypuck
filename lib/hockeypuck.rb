@@ -1,6 +1,8 @@
-require 'net/http'
-require 'fileutils'
 require 'celluloid'
+require 'net/http'
+
+autoload 'fileutils'
+
 require_relative 'hockeypuck/rules'
 require_relative 'hockeypuck/player'
 require_relative 'hockeypuck/ball_hog'
