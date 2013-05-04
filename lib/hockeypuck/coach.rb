@@ -1,25 +1,40 @@
 class Hockeypuck
-  class Coach
+  module Coach
 
-    attr_reader :puck, :team, :rules
+    class << self
 
-    def initialize(puck)
-      @name = 'Don Johnson'
-      @puck = puck
-    end
+      attr_reader :team, :pucks
 
-    def make_strategy_for(puck)
-      if accepts_ranges? && !simple
-        async_download
-      else
-        ball_hog.score!
+      def name
+        'Don Johnson'
       end
-    end
 
-    private
+      def start!
+        puck.rules.set_gates
 
-    def part_offset(part_size, part_num)
-      [part_size * (part_num - 1), part_size * part_num]
+        if accepts_ranges? && !simple
+          async_download
+        else
+          ball_hog.score!
+        end
+      end
+
+      def set_strategy_for(puck, ball_hog = false)
+        hire_team unless team
+
+        list.add puck, ball_hog or not accepts_passes?
+      end
+
+      def find_gates_for(puck)
+        puck.rules.set_gates
+      end
+
+      private
+
+      def part_offset(part_size, part_num)
+        [part_size * (part_num - 1), part_size * part_num]
+      end
+
     end
 
   end

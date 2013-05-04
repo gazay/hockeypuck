@@ -11,6 +11,11 @@ class Hockeypuck
 
   class << self
 
+    def add(path)
+      puck = Hockeypuck.new path, with_info: true
+      Hockeypuck::Coach.set_strategy_for puck
+    end
+
     attr_reader :rules
     def set_rules
       @rules ||= Rules.new
@@ -21,15 +26,13 @@ class Hockeypuck
 
   attr_reader :rules, :head, :size
 
-  def initialize(uri, with_info = true, file_path = nil)
+  def initialize(path, opts = {})
     clone_rules
-    rules.set uri, file_path
-    request_info! if with_info
+    rules.set path, file_path
+    request_info! if opts[:with_info]
   end
 
   def start!(simple = false)
-    rules.set_gates
-
     if accepts_ranges? && !simple
       async_download
     else
@@ -96,3 +99,4 @@ class Hockeypuck
 end
 
 Hockeypuck.set_rules
+Puck = Hockeypuck
